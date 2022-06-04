@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.idea/
+*/migrations/*
+mydrf/settings/dev.py
+mydrf/settings/settings.py
