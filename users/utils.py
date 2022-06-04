@@ -17,32 +17,23 @@ def my_jwt_response_payload_handler(token, user=None, request=None, role=None):
                 "message": "success",
                 "data": {
                     # 'auth': True,
-                    'id': user.id,
-                    'name': myuser['username'],
-                    'roles': myuser['role_value'],
+                    # 'id': user.id,
+                    # 'name': myuser['username'],
+                    # 'roles': myuser['role_value'],
                     # 'email': users.email,
                     'token': token,
                 }
                 }
-    else:
-        data = {
-            "code": 401,
-            "message": "用户不存在或无权限",
-            "data": {}
-        }
-    return data
+
+        return data
 
 
 def my_jwt_payload_handler(user):
     username_field = get_username_field()
     username = get_username(user)
-    myuser = MyUserSerializer(user).data
 
     payload = {
-        'user_id': user.pk,
         'username': username,
-        'roles': myuser['role_value'],
-        'exp': datetime.utcnow() + api_settings.JWT_EXPIRATION_DELTA
     }
     if isinstance(user.pk, uuid.UUID):
         payload['user_id'] = str(user.pk)

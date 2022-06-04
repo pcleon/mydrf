@@ -3,13 +3,15 @@ from rest_framework import viewsets
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, ListModelMixin
 from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
-from rest_framework_jwt.views import VerifyJSONWebToken, JSONWebTokenAPIView
+from rest_framework_jwt.views import JSONWebTokenAPIView
 from django.contrib.auth import get_user_model
 from rest_framework_jwt.serializers import VerifyJSONWebTokenSerializer
+
+from users.models import MyUser
 from users.serializers import MyUserSerializer
 
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
-jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
+# jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -46,11 +48,15 @@ class MyTokenView(JSONWebTokenAPIView):
                                     token,
                                     expires=expiration,
                                     httponly=True)
+
+            obj = MyUser.objects.get(username=user.username)
+            user_info = MyUserSerializer(obj).data
             res = {"code": 20000,
                    "message": "success",
                    "data": {
-                       "name": response_data['data']['name'],
-                       "roles": response_data['data']['roles'],
+                       "name": user_info['username'],
+                       "roles": [user_info['role_value']],
+                       "introduction": f"I am a {user_info['role_value']}",
                        "avatar": "https://avatars.githubusercontent.com/u/2787937",
                    }
                    }
