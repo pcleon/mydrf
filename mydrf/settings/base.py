@@ -131,5 +131,6 @@ JWT_AUTH = {
     #  设置token有效期
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(hours=8),
+    'JWT_PAYLOAD_HANDLER': 'users.utils.my_jwt_payload_handler',
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'users.utils.my_jwt_response_payload_handler',
 }

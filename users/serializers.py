@@ -9,9 +9,12 @@ from users.models import MyUser
 #         fields = ('uid', 'username', 'email', 'groups')
 
 class MyUserSerializer(serializers.ModelSerializer):
+    role_value = serializers.SerializerMethodField()
+
+
     class Meta:
         model = MyUser
-        fields = ('username', 'password', 'mobile', 'role')
+        fields = ('username', 'password', 'mobile', 'role_value')
 
     def create(self, validated_data):
         # user = super().create(validated_date=validated_data)
@@ -19,6 +22,10 @@ class MyUserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+    def get_role_value(self, obj):
+        return obj.get_role_display()
+
 
 
 # class GroupSerializer(serializers.HyperlinkedModelSerializer):
