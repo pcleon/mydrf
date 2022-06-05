@@ -11,7 +11,7 @@ class MyUser(AbstractUser):
         ('3', 'editor'),
         ('4', 'developer'),
     )
-    mobile = models.CharField('手机号', max_length=11, blank=True, null=True)
+    mobile = models.CharField('手机号', max_length=11, default='', blank=True, null=True)
     role = models.CharField('角色', choices=role_choices, default='0', max_length=2)
     avatar = models.CharField('头像', default='', max_length=100, blank=True, null=True)
 

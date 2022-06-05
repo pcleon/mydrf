@@ -6,8 +6,8 @@ from users.models import MyUser
 
 @admin.register(MyUser)
 class MyUserAdm(UserAdmin):
-    list_display = ['id', 'username', 'role', 'mobile']
-    # list_display_links = ['id', 'name']
+    list_display = ['username', 'role', 'mobile']
+    list_display_links = ['username']
 
     fieldsets = (
         ('用户信息', {'fields': ('username', 'password')}),
