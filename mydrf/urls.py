@@ -17,11 +17,9 @@ from django.contrib import admin
 from django.urls import path
 
 from django.conf.urls import url, include
-from rest_framework_jwt.views import obtain_jwt_token
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/user/', include('users.urls')),
-    # path('', include('books.urls')),
+    path('api/vue-element-admin/', include('books.urls'))
 ]

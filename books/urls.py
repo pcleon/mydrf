@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.urls import path
 from . import views
-from rest_framework import routers
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register('vue-element-admin/article/list', views.BookModeViewSet, basename='article')
 
 urlpatterns = [
     # path(r'book/<id>', views.BookOneThirdAPIView.as_view()),
@@ -13,3 +16,5 @@ urlpatterns = [
     path(r'book/<pk>', views.BookModeViewSet.as_view({'get':'retrieve','put':'update','delete':'destroy'})),
     path(r'book/', views.BookModeViewSet.as_view({'get':'list','post':'create'})),
 ]
+
+urlpatterns += router.urls
