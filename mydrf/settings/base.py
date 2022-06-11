@@ -1,9 +1,12 @@
 import datetime
 from pathlib import Path
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# 添加apps到path查找路径中,方便直接导入
+sys.path.insert(0, Path.joinpath(BASE_DIR, 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -31,6 +34,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'users.apps.UserConfig',
+    # 'users',
     'books',
 ]
 
@@ -127,10 +131,11 @@ REST_FRAMEWORK = {
 
 
 JWT_AUTH = {
-    'JWT_ALLOW_REFRESH': True,
-    #  设置token有效期
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(hours=8),
+    #  设置token有效期,在payload里面配置后这个地方就会无效
+    # 'JWT_EXPIRATION_DELTA': datetime.timedelta(days=8),
+    # 'JWT_EXPIRATION_VERIFY': 'users.jwt.my_jwt_expire_delta',
+    # 'JWT_ALLOW_REFRESH': True,
+    # 'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(hours=8),
     'JWT_PAYLOAD_HANDLER': 'users.jwt.my_jwt_payload_handler',
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'users.jwt.my_jwt_response_payload_handler',
 }

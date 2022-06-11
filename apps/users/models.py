@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
+# from django.contrib.auth.backends import ModelBackend
 from django.db import models
+from django.db.models import Q
+
 
 # Create your models here.
 
@@ -17,3 +20,14 @@ class MyUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+# django.contrib.auth.backends获取auth模块的验证和⽤户的信息
+# class CustomBackend(ModelBackend):
+#     def authenticate(self, username=None, password=None, **kwargs):
+#         try:
+#             user = MyUser.objects.get(Q(username=username) | Q(email=username))
+#             if user.check_password(password):
+#                 return user
+#         except Exception as e:
+#             return None

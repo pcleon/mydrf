@@ -131,3 +131,5 @@ dmypy.json
 */migrations/*
 mydrf/settings/dev.py
 mydrf/settings/settings.py
+
+/apps/*/migrations/*

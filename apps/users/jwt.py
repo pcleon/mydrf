@@ -1,14 +1,12 @@
 import uuid
 from calendar import timegm
-from datetime import datetime
+import datetime
 
 from rest_framework_jwt.settings import api_settings
 
 from users.serializers import MyUserSerializer
 from rest_framework_jwt.compat import get_username
 from rest_framework_jwt.compat import get_username_field
-
-jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
 def my_jwt_response_payload_handler(token, user=None, request=None, role=None):
     myuser = MyUserSerializer(user).data
@@ -31,9 +29,17 @@ def my_jwt_response_payload_handler(token, user=None, request=None, role=None):
 def my_jwt_payload_handler(user):
     username_field = get_username_field()
     username = get_username(user)
+    role_idx = user.get_role_display()
+    if role_idx == "DBA":
+        exp = datetime.timedelta(hours=1)
+    else:
+        exp = datetime.timedelta(hours=8)
+
 
     payload = {
         'username': username,
+        'exp': datetime.datetime.utcnow() + exp
+
     }
     if isinstance(user.pk, uuid.UUID):
         payload['user_id'] = str(user.pk)
@@ -44,7 +50,7 @@ def my_jwt_payload_handler(user):
     # to allow token refresh
     if api_settings.JWT_ALLOW_REFRESH:
         payload['orig_iat'] = timegm(
-            datetime.utcnow().utctimetuple()
+            datetime.datetime.utcnow().utctimetuple()
         )
 
     if api_settings.JWT_AUDIENCE is not None:
