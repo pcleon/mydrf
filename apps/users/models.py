@@ -21,6 +21,10 @@ class MyUser(AbstractUser):
     def __str__(self):
         return self.username
 
+    class Meta:
+        ordering = ['-date_joined']
+        verbose_name = "用户"
+        verbose_name_plural = verbose_name
 
 # django.contrib.auth.backends获取auth模块的验证和⽤户的信息
 # class CustomBackend(ModelBackend):
