@@ -1,5 +1,4 @@
-from django.http import JsonResponse
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, ListModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,30 +12,31 @@ from users.serializers import MyUserSerializer
 from common.utils import MyResponse
 
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
-# jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
 
 class LogoutView(APIView):
     """
     登出
     """
+    @MyResponse
     def post(self, req):
-        return JsonResponse({
-            'code': 20000,
-            'data': 'success'
-        })
+        data = "logout"
+        return Response(data)
 
-
-class MyUserViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewsets.GenericViewSet):
+class MyUserViewSet(viewsets.ModelViewSet):
     """
     允许用户查看或编辑的 API 端点。
     """
     queryset = get_user_model().objects.all()
     serializer_class = MyUserSerializer
+    permission_classes = (permissions.DjangoModelPermissions,)
+    # 按用户名查找
+    lookup_field = 'username'
 
 
 class MyTokenView(JSONWebTokenAPIView):
     serializer_class = VerifyJSONWebTokenSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     @MyResponse
     def get(self, request, *args, **kwargs):
@@ -57,10 +57,10 @@ class MyTokenView(JSONWebTokenAPIView):
 
             obj = MyUser.objects.get(username=user.username)
             user_info = MyUserSerializer(obj).data
-            res = {
+            data = {
                 "name": user_info['username'],
                 "roles": [user_info['role_value']],
                 "introduction": f"I am a {user_info['role_value']}",
                 "avatar": "https://avatars.githubusercontent.com/u/2787937",
             }
-            return JsonResponse(res)
+            return Response(data)

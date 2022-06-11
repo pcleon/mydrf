@@ -2,17 +2,35 @@
 import json
 
 from django.http import JsonResponse
+from rest_framework.response import Response
+
 
 def MyResponse(func):
-    def wrapper(request, *args, **kwargs):
-        data_dic = None
-        try:
-            data_dic = func(request, *args, **kwargs)
-            assert isinstance(data_dic, JsonResponse) and data_dic.status_code >= 200
-        except Exception as e:
-            res = dict(code=50000, msg=f'{e.__repr__()}', data=f'{data_dic}')
-            return JsonResponse(res)
+    '''
+    need dict
+    :param func:
+    :return:
+    '''
 
-        res = dict(code=20000, msg='成功', data=json.loads(data_dic.content))
-        return JsonResponse(res)
+    def wrapper(request, *args, **kwargs):
+        payload = None
+        try:
+            payload = func(request, *args, **kwargs)
+            assert isinstance(payload, Response, ) and payload.status_code >= 200, "请求失败"
+            data = payload.data
+        except Exception as e:
+            res = {
+                "code": 50000,
+                "msg": e.__repr__(),
+                "data": payload
+            }
+            return Response(res)
+
+        res = {
+            "code": 20000,
+            "msg": "成功",
+            "data": payload.data,
+        }
+        return Response(res)
+
     return wrapper

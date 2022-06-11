@@ -29,8 +29,8 @@ def my_jwt_response_payload_handler(token, user=None, request=None, role=None):
 def my_jwt_payload_handler(user):
     username_field = get_username_field()
     username = get_username(user)
-    role_idx = user.get_role_display()
-    if role_idx == "DBA":
+    role = user.get_role_display()
+    if role == "DBA":
         exp = datetime.timedelta(hours=1)
     else:
         exp = datetime.timedelta(hours=8)
