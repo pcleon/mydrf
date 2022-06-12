@@ -16,7 +16,7 @@ def MyResponse(func):
         payload = None
         try:
             payload = func(request, *args, **kwargs)
-            assert isinstance(payload, Response, ) and payload.status_code >= 200, "请求失败"
+            assert isinstance(payload, Response) and payload.status_code >= 200, "请求失败"
             data = payload.data
         except Exception as e:
             res = {
