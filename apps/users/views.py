@@ -1,17 +1,35 @@
-from rest_framework import viewsets, permissions
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, ListModelMixin
+from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_jwt.settings import api_settings
-from rest_framework_jwt.views import JSONWebTokenAPIView
 from django.contrib.auth import get_user_model
-from rest_framework_jwt.serializers import VerifyJSONWebTokenSerializer
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from users.models import MyUser
-from users.serializers import MyUserSerializer
+from users.serializers import MyVueTokenObtainSerializer, MyUserSerializer
 from common.utils import MyResponse
 
-jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import AllowAny
+
+
+class MyVueObtainTokenView(TokenObtainPairView):
+    permission_classes = (AllowAny,)
+    serializer_class = TokenObtainPairSerializer
+
+    # 自己定义,只返回想要的access,使用TokenObtainPairSerializer会返回refresh和access
+    # serializer_class = MyVueTokenObtainSerializer
+
+    # 只返回token字段
+    @MyResponse
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        return Response({"token": serializer.validated_data.get('access')}, status=status.HTTP_200_OK)
 
 
 class LogoutView(APIView):
@@ -32,35 +50,3 @@ class MyUserViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.DjangoModelPermissions,)
     # 按用户名查找
     lookup_field = 'username'
-
-
-class MyTokenView(JSONWebTokenAPIView):
-    serializer_class = VerifyJSONWebTokenSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-
-    @MyResponse
-    def get(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.query_params.dict())
-
-        if serializer.is_valid():
-            user = serializer.object.get('user') or request.user
-            token = serializer.object.get('token')
-            response_data = jwt_response_payload_handler(token, user, request)
-            response = Response(response_data)
-            if api_settings.JWT_AUTH_COOKIE:
-                expiration = (datetime.utcnow() +
-                              api_settings.JWT_EXPIRATION_DELTA)
-                response.set_cookie(api_settings.JWT_AUTH_COOKIE,
-                                    token,
-                                    expires=expiration,
-                                    httponly=True)
-
-            obj = MyUser.objects.get(username=user.username)
-            user_info = MyUserSerializer(obj).data
-            data = {
-                "name": user_info['username'],
-                "roles": [user_info['role_value']],
-                "introduction": f"I am a {user_info['role_value']}",
-                "avatar": "https://avatars.githubusercontent.com/u/2787937",
-            }
-            return Response(data)

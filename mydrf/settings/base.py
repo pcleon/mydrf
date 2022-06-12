@@ -125,7 +125,7 @@ APPEND_SLASH=True
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # JWT
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
@@ -144,4 +144,10 @@ JWT_AUTH = {
     # 'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(hours=8),
     'JWT_PAYLOAD_HANDLER': 'users.jwt.my_jwt_payload_handler',
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'users.jwt.my_jwt_response_payload_handler',
+}
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=5),
+    'TOKEN_TYPE_CLAIM': 'auth',
 }
