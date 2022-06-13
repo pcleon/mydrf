@@ -20,7 +20,7 @@ DEBUG = False
 ALLOWED_HOSTS = ['*', ]
 
 # 使用自定义用户模板
-AUTH_USER_MODEL = 'users.MyUser'
+AUTH_USER_MODEL = 'users.User'
 
 # Application definition
 
@@ -33,8 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'users.apps.UserConfig',
-    # 'users',
+    'users',
     'books',
     'blog',
 ]

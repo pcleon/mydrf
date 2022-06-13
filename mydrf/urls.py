@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('rest_framework.urls')),
     path('api/user/', include('users.urls')),
-    path('api/book/', include('books.urls')),
-    path('api/blog/', include('blog.urls')),
-    path('api/vue-element-admin/', include('books.urls'))
+    # path('api/book/', include('books.urls')),
+    # path('api/blog/', include('blog.urls')),
+    # path('api/vue-element-admin/', include('books.urls'))
 ]

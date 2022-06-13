@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 
-from users.models import MyUser
+from users.models import User
 from users.serializers import MyUserSerializer
 from common.utils import MyResponse
 
@@ -43,7 +43,7 @@ class MyVueVerifyView(APIView):
     def get(self, request):
         token = request.query_params.get("token")
         access_token = AccessToken(token)
-        user = MyUser.objects.get(id=access_token['user_id'])
+        user = User.objects.get(id=access_token['user_id'])
         u_info = {
             "name": user.username,
             "roles": [user.get_role_display()],

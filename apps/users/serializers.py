@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.models import MyUser
+from users.models import User
 
 
 # class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -15,7 +15,7 @@ class MyUserSerializer(serializers.ModelSerializer):
     role_value = serializers.ReadOnlyField(source="get_role_display")
 
     class Meta:
-        model = MyUser
+        model = User
         fields = ('username', 'mobile', 'role', 'email', 'role_value')
         extra_kwargs = {'password': {'write_only': True}}
 
