@@ -8,10 +8,14 @@ class User(AbstractUser):
     mobile = models.CharField('手机号', max_length=11, default='', blank=True, null=True)
     # avatar = models.CharField('头像', default='', max_length=100, blank=True, null=True)
     # 通过db_column指定添加的约束的字段名,否则为默认"字段名_id"
-    team_name = models.ForeignKey('Team', on_delete=models.CASCADE, blank=True, null=True, db_column='team_name')
+    team = models.ForeignKey('Team', on_delete=models.CASCADE, blank=True, null=True, db_column='team',
+                             verbose_name='团队')
 
     def __str__(self):
         return self.username
+
+    def roles(self):
+        return [x.get_role_display() for x in self.role_set.all()]
 
     class Meta:
         db_table = 'my_user'
@@ -27,6 +31,7 @@ class Team(models.Model):
         return self.team_name
 
     class Meta:
+        # ordering = ['-id']
         db_table = 'my_team'
         verbose_name = "团队"
         verbose_name_plural = verbose_name
@@ -41,7 +46,10 @@ class Role(models.Model):
         (4, 'developer'),
     )
     role = models.IntegerField('用户权限', choices=role_choices, blank=True)
-    username = models.ManyToManyField('User', db_column='username', db_table='my_user_role')
+    users = models.ManyToManyField('User', db_column='user', db_table='my_user_role')
+
+    def user_list(self):
+        return [x.get_username() for x in self.users.all()]
 
     # role_id = models.IntegerField('角色名', choices=role_choices)
 

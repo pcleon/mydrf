@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions, status
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
@@ -8,8 +9,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 
-from users.models import User
-from users.serializers import MyUserSerializer
+from users.models import User, Role
+from users.serializers import UserSerializer, MyUserSerializer
 from common.utils import MyResponse
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenViewBase
@@ -39,30 +40,30 @@ class MyVueObtainTokenView(TokenObtainPairView):
 class MyVueVerifyView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    @MyResponse
+    # @MyResponse
     def get(self, request):
         token = request.query_params.get("token")
         access_token = AccessToken(token)
         user = User.objects.get(id=access_token['user_id'])
+        roles = [x.get_role_display() for x in user.role_set.all()]
         u_info = {
             "name": user.username,
-            "roles": [user.get_role_display()],
+            "team": user.team.team_name,
+            "roles": roles,
             "email": user.email,
             "avatar": "https://avatars.githubusercontent.com/u/2787937?s=100",
             "introduction": f"我是{user.username}, 哈哈哈哈!!"
         }
+
         return Response(u_info)
 
 
-class LogoutView(APIView):
-    """
-    登出
-    """
-
-    @MyResponse
-    def post(self, request):
-        data = "logout"
-        return Response(data)
+class UserApiView(APIView):
+    # class UserApiView(viewsets.ModelViewSet):
+    def get(self, request):
+        obj = User.objects.all()
+        serializer = UserSerializer(obj, many=True)
+        return Response(serializer.data)
 
 
 class MyUserViewSet(viewsets.ModelViewSet):
@@ -76,7 +77,19 @@ class MyUserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
 
 
+class LogoutView(APIView):
+    """
+    登出
+    """
+
+    @MyResponse
+    def post(self, request):
+        data = "logout"
+        return Response(data)
+
+
 User = get_user_model()
+
 
 class MyCustomBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):

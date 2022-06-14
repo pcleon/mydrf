@@ -33,7 +33,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     # 指定author字段的来源(source)为原单个author对象的username，status字段为get_status_display方法返回的完整状态
     # author = serializers.ReadOnlyField(source="author.username")
     #
-    author = MyUserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
     full_status = serializers.ReadOnlyField(source="get_status_display")
     # full_status = serializers.SerializerMethodField()
 

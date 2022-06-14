@@ -6,17 +6,23 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 
 
-# class UserSerializer(serializers.HyperlinkedModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ('uid', 'username', 'email', 'groups')
+class UserSerializer(serializers.ModelSerializer):
+    team = serializers.CharField(source='team.team_name', allow_null=True)
+    # team = serializers.CharField(source='team.team_name', allow_blank=True, allow_null=True)
+    class Meta:
+        model = User
+        fields = ('username', 'mobile', 'email', 'team')
+        # extra_kwargs = {'password': {'write_only': True}}
+
 
 class MyUserSerializer(serializers.ModelSerializer):
-    role_value = serializers.ReadOnlyField(source="get_role_display")
+    # role_value = serializers.ReadOnlyField(source="get_role_display")
+    # roles = Role.objects.get()
+    team = serializers.CharField(source='team.team_name', allow_null=True)
 
     class Meta:
         model = User
-        fields = ('username', 'mobile', 'role', 'email', 'role_value')
+        fields = ('username', 'mobile', 'email', 'team')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
