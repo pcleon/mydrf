@@ -31,7 +31,11 @@ class TeamAdm(admin.ModelAdmin):
 
 class RoleAdm(admin.ModelAdmin):
     list_display = ['role']
-    list_display_links = ['role']
+
+    fieldsets = (
+        (_('权限'), {'fields': ('role', 'username')}),
+    )
+    filter_horizontal = ('username',)
 
 
 # class RoleUserRelationAdm(admin.ModelAdmin):
@@ -39,6 +43,6 @@ class RoleAdm(admin.ModelAdmin):
 #     list_display_links = ['username', 'role_id']
 #
 #
-admin.site.register(Role, RoleAdm)
 admin.site.register(Team, TeamAdm)
+admin.site.register(Role, RoleAdm)
 # admin.site.register(RoleUserRelation, RoleUserRelationAdm)
