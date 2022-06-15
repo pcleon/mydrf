@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
     # team = serializers.CharField(source='team.team_name', allow_blank=True, allow_null=True)
     class Meta:
         model = User
-        fields = ('username', 'mobile', 'email', 'team')
+        fields = ('id', 'username', 'mobile', 'email', 'team', 'date_joined', 'last_login', 'is_active', 'roles')
         # extra_kwargs = {'password': {'write_only': True}}
 
 

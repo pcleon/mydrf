@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
-from users.views import MyVueObtainTokenView, MyVueVerifyView, LogoutView, UserApiView, MyUserViewSet
+from users.views import MyVueObtainTokenView, MyVueVerifyView, LogoutView, MyUserViewSet, UserApiView
 
 router = SimpleRouter()
 

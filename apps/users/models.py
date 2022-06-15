@@ -19,7 +19,7 @@ class User(AbstractUser):
 
     class Meta:
         db_table = 'my_user'
-        ordering = ['-date_joined']
+        # ordering = ['-id']
         verbose_name = "用户"
         verbose_name_plural = verbose_name
 
@@ -46,7 +46,7 @@ class Role(models.Model):
         (4, 'developer'),
     )
     role = models.IntegerField('用户权限', choices=role_choices, blank=True)
-    users = models.ManyToManyField('User', db_column='user', db_table='my_user_role')
+    users = models.ManyToManyField('User', db_column='user', db_table='my_user_role', blank=True)
 
     def user_list(self):
         return [x.get_username() for x in self.users.all()]

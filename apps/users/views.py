@@ -40,13 +40,14 @@ class MyVueObtainTokenView(TokenObtainPairView):
 class MyVueVerifyView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    # @MyResponse
+    @MyResponse
     def get(self, request):
         token = request.query_params.get("token")
         access_token = AccessToken(token)
         user = User.objects.get(id=access_token['user_id'])
         roles = [x.get_role_display() for x in user.role_set.all()]
         u_info = {
+            "uid": user.id,
             "name": user.username,
             "team": user.team.team_name,
             "roles": roles,
@@ -59,12 +60,23 @@ class MyVueVerifyView(APIView):
 
 
 class UserApiView(APIView):
-    # class UserApiView(viewsets.ModelViewSet):
+    @MyResponse
     def get(self, request):
         obj = User.objects.all()
         serializer = UserSerializer(obj, many=True)
-        return Response(serializer.data)
+        # data = {
+        #     code: 20000,
+        #     data: {
+        #         total: items.length,
+        #         items: items
+        #     }
+        # }
+        d = {
+            'total': len(serializer.data),
+            'items': serializer.data
+        }
 
+        return Response(serializer.data)
 
 class MyUserViewSet(viewsets.ModelViewSet):
     """
