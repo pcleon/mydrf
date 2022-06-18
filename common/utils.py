@@ -1,8 +1,7 @@
 # 定义装饰器函数
-import json
-
-from django.http import JsonResponse
 from rest_framework.response import Response
+from functools import wraps
+
 
 
 def MyResponse(func):
@@ -12,12 +11,13 @@ def MyResponse(func):
     :return:
     '''
 
-    def wrapper(request, *args, **kwargs):
+    # def wrapper(request, *args, **kwargs):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
         payload = None
         try:
-            payload = func(request, *args, **kwargs)
+            payload = func(*args, **kwargs)
             assert isinstance(payload, Response) and payload.status_code >= 200, "请求失败"
-            data = payload.data
         except Exception as e:
             res = {
                 "code": 50000,
@@ -26,11 +26,12 @@ def MyResponse(func):
             }
             return Response(res)
 
-        res = {
+        payload.data = {
             "code": 20000,
             "msg": "成功",
             "data": payload.data,
         }
-        return Response(res)
+        # return Response(res)
+        return payload
 
     return wrapper
