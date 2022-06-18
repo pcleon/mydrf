@@ -3,33 +3,50 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.models import User
+from users.models import User, Team, Role
 
 
-class UserSerializer(serializers.ModelSerializer):
-    team = serializers.CharField(source='team.team_name', allow_null=True)
-    # team = serializers.CharField(source='team.team_name', allow_blank=True, allow_null=True)
+class RoleSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(source='get_role_display')
+
     class Meta:
-        model = User
-        fields = ('id', 'username', 'mobile', 'email', 'team', 'date_joined', 'last_login', 'is_active', 'roles')
+        model = Role
+        fields = '__all__'
         # extra_kwargs = {'password': {'write_only': True}}
 
 
-class MyUserSerializer(serializers.ModelSerializer):
-    # role_value = serializers.ReadOnlyField(source="get_role_display")
-    # roles = Role.objects.get()
-    team = serializers.CharField(source='team.team_name', allow_null=True)
+class UserSerializer(serializers.ModelSerializer):
+    # query_set或者read_only都可以
+    team = serializers.PrimaryKeyRelatedField(source='team.team_name', read_only=True)
+    # team = serializers.SlugRelatedField(slug_field='team_name', queryset=Team.objects.all())
+
+    # roles = serializers.SlugRelatedField(slug_field='role', many=True, queryset=Role.objects.all(), allow_null=True)
+    # roles = serializers.ManyRelatedField(
+    #     child_relation=serializers.SlugRelatedField(slug_field="role", many=True, queryset=Role.objects.all()), source='username')
+    # queryset=Role.objects.all(), source="username")
+
+    def get_roles(self, obj):
+        return [x.role.get_role_display() for x in self.roles.all()]
 
     class Meta:
         model = User
-        fields = ('username', 'mobile', 'email', 'team')
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = (
+            'id', 'username', 'mobile', 'email', 'team', 'date_joined',
+            'last_login', 'is_active', 'roles', 'roles_name')
+        read_only_fields = (
+            'id', 'username', 'date_joined', 'last_login', 'roles_name'
+        )
+        extra_kwargs = {
+            # 'roles': {'write_only': True},
+        }
 
     def create(self, validated_data):
         user = super().create(validated_data=validated_data)
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+    # def fetch(self, instance, vali):
 
 
 class MyVueTokenObtainSerializer(TokenObtainSerializer):

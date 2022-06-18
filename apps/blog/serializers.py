@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from users.serializers import MyUserSerializer
+from users.serializers import UserSerializer
 from .models import Article
 from django.contrib.auth import get_user_model
 

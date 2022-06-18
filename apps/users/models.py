@@ -11,11 +11,13 @@ class User(AbstractUser):
     team = models.ForeignKey('Team', on_delete=models.CASCADE, blank=True, null=True, db_column='team',
                              verbose_name='团队')
 
+    roles = models.ManyToManyField('Role', db_column='roles', db_table='my_user_role', blank=True, verbose_name='角色')
+
     def __str__(self):
         return self.username
 
-    def roles(self):
-        return [x.get_role_display() for x in self.role_set.all()]
+    def roles_name(self):
+        return [x.get_role_display() for x in self.roles.all()]
 
     class Meta:
         db_table = 'my_user'
@@ -45,17 +47,17 @@ class Role(models.Model):
         (3, 'editor'),
         (4, 'developer'),
     )
-    role = models.IntegerField('用户权限', choices=role_choices, blank=True)
-    users = models.ManyToManyField('User', db_column='user', db_table='my_user_role', blank=True)
+    role = models.IntegerField('用户角色', choices=role_choices, blank=True)
 
     def user_list(self):
-        return [x.get_username() for x in self.users.all()]
+        return [x.get_username() for x in self.user_set.all()]
 
-    # role_id = models.IntegerField('角色名', choices=role_choices)
+    def __str__(self):
+        return self.get_role_display()
 
     class Meta:
         db_table = 'my_role'
-        verbose_name = "用户权限"
+        verbose_name = "用户角色"
         verbose_name_plural = verbose_name
 
 #
