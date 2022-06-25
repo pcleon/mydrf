@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import AccessToken
-from django.contrib.auth import get_user_model, get_user
+from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 
@@ -12,8 +12,22 @@ from users.models import User
 from users.serializers import UserSerializer
 from common.utils import MyResponse
 
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
 from rest_framework.permissions import AllowAny, IsAuthenticated
+
+
+class UserTokenVerifyView(TokenVerifyView):
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class MyVueObtainTokenView(TokenObtainPairView):
@@ -57,27 +71,26 @@ class MyVueVerifyView(APIView):
         return Response(u_info)
 
 
-class UserApiView(APIView):
-    @MyResponse
-    def get(self, request):
-        obj = User.objects.all()
-        serializer = UserSerializer(obj, many=True)
-        d = {
-            'total': len(serializer.data),
-            'items': serializer.data
-        }
-
-        return Response(serializer.data)
+# class UserApiView(APIView):
+#     @MyResponse
+#     def get(self, request):
+#         obj = User.objects.all()
+#         serializer = UserSerializer(obj, many=True)
+#         d = {
+#             'total': len(serializer.data),
+#             'items': serializer.data
+#         }
+#
+#         return Response(serializer.data)
 
 
 class UserViewSet(viewsets.ModelViewSet):
     """
     允许用户查看或编辑的 API 端点。
     """
-    # queryset = get_user_model().objects.all()
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.DjangoModelPermissions,)
+    permission_classes = (permissions.IsAuthenticated,)
     # 按用户名查找
     lookup_field = 'username'
 
@@ -103,10 +116,6 @@ class LogoutView(APIView):
     def post(self, request):
         data = "logout"
         return Response(data)
-
-
-User = get_user_model()
-
 
 class MyCustomBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):

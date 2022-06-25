@@ -130,20 +130,10 @@ REST_FRAMEWORK = {
     ),
     # 权限设置
     'DEFAULT_PERMISSION_CLASSES': (
-        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated',
     )
 }
 
-
-JWT_AUTH = {
-    #  设置token有效期,在payload里面配置后这个地方就会无效
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
-    # 'JWT_EXPIRATION_VERIFY': 'users.jwt.my_jwt_expire_delta',
-    # 'JWT_ALLOW_REFRESH': True,
-    # 'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(hours=8),
-    'JWT_PAYLOAD_HANDLER': 'users.jwt.my_jwt_payload_handler',
-    'JWT_RESPONSE_PAYLOAD_HANDLER': 'users.jwt.my_jwt_response_payload_handler',
-}
 
 AUTHENTICATION_BACKENDS = (
     'users.views.MyCustomBackend',
@@ -152,4 +142,8 @@ AUTHENTICATION_BACKENDS = (
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=5),
     'TOKEN_TYPE_CLAIM': 'auth',
+    # 自定义头标识符
+    'AUTH_HEADER_TYPES': ('Vue',),
+    # 头信息载荷为JWT
+    'AUTH_HEADER_NAME': 'HTTP_JWT',
 }
