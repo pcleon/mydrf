@@ -131,7 +131,8 @@ REST_FRAMEWORK = {
     # 权限设置
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    )
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'common.pagination.MyPageNumberPagination'
 }
 
 

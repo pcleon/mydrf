@@ -4,10 +4,10 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import AccessToken
-from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 
+from common.pagination import MyPageNumberPagination
 from users.models import User
 from users.serializers import UserSerializer
 from common.utils import MyResponse
@@ -25,7 +25,6 @@ class UserTokenVerifyView(TokenVerifyView):
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0])
-
 
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
@@ -91,14 +90,16 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated,)
+    # pagination_class = MyPageNumberPagination
     # 按用户名查找
     lookup_field = 'username'
 
     @MyResponse
-    # def get(self, request):
     def list(self, request):
         query_set = self.get_queryset()
-        serializer = UserSerializer(query_set, many=True)
+        page = MyPageNumberPagination()
+        ret = page.paginate_queryset(query_set, request)
+        serializer = UserSerializer(ret, many=True)
         res = {
             'total': len(serializer.data),
             'items': serializer.data
@@ -116,6 +117,7 @@ class LogoutView(APIView):
     def post(self, request):
         data = "logout"
         return Response(data)
+
 
 class MyCustomBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
