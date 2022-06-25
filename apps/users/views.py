@@ -89,24 +89,12 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
     permission_classes = (permissions.IsAuthenticated,)
-    # pagination_class = MyPageNumberPagination
+    # 分页
+    pagination_class = MyPageNumberPagination
     # 按用户名查找
     lookup_field = 'username'
-
-    @MyResponse
-    def list(self, request):
-        query_set = self.get_queryset()
-        page = MyPageNumberPagination()
-        ret = page.paginate_queryset(query_set, request)
-        serializer = UserSerializer(ret, many=True)
-        res = {
-            'total': len(serializer.data),
-            'items': serializer.data
-        }
-
-        return Response(res)
-
 
 class LogoutView(APIView):
     """

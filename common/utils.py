@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from functools import wraps
 
 
-
 def MyResponse(func):
     '''
     need dict
@@ -35,3 +34,16 @@ def MyResponse(func):
         return payload
 
     return wrapper
+
+
+class APIResponse(Response):
+    def __init__(self, status=20000, msg='ok', http_status=None, headers=None, exception=False, **kwargs):
+        # 将外界传入的数据状态码，状态信息以及其他所有额外存储在kwargs中的信息，都格式化成data数据
+        data = {
+            'status': status,
+            'msg': msg
+        }
+        # 在外界数据可以用result和results来存储
+        if kwargs:
+            data.update(kwargs)
+        super().__init__(data=data, stutus=http_status, headers=headers, exception=exception)
