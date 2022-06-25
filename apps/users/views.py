@@ -37,7 +37,7 @@ class MyVueObtainTokenView(TokenObtainPairView):
     # serializer_class = MyVueTokenObtainSerializer
 
     # 只返回token字段
-    @MyResponse
+    # @MyResponse
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
@@ -52,7 +52,7 @@ class MyVueObtainTokenView(TokenObtainPairView):
 class MyVueVerifyView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    @MyResponse
+    # @MyResponse
     def get(self, request):
         token = request.query_params.get("token")
         access_token = AccessToken(token)
@@ -100,8 +100,8 @@ class LogoutView(APIView):
     """
     登出
     """
+    permission_classes = (permissions.AllowAny,)
 
-    @MyResponse
     def post(self, request):
         data = "logout"
         return Response(data)

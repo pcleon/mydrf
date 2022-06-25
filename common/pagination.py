@@ -12,7 +12,7 @@ class MyPageNumberPagination(PageNumberPagination):
     page_size_query_param = 'limit'  # 前台控制每页显示的最大条数
     max_page_size = 10  # 后台控制显示的最大记录条数
 
-    @MyResponse
+    # @MyResponse
     def get_paginated_response(self, data):
         return Response(OrderedDict([
             ('total', self.page.paginator.count),

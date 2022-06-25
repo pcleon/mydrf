@@ -51,7 +51,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mydrf.urls'
 
-
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
@@ -76,7 +75,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mydrf.wsgi.application'
 
-
 # 用户改密的时候校验方式
 AUTH_PASSWORD_VALIDATORS = [
     # {
@@ -93,7 +91,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -107,7 +104,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
@@ -118,7 +114,7 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATE_FORMAT = 'Y-m-d'
-APPEND_SLASH=True
+APPEND_SLASH = True
 
 # DRF
 REST_FRAMEWORK = {
@@ -132,9 +128,18 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'common.pagination.MyPageNumberPagination'
+    # 全局自定义分页
+    'DEFAULT_PAGINATION_CLASS': 'common.pagination.MyPageNumberPagination',
+    # 重定义渲染
+    'DEFAULT_RENDERER_CLASSES': (  # 默认响应渲染类
+        'common.utils.ApiRenderer',  # 全局使用自定义渲染器
+        'rest_framework.renderers.JSONRenderer',  # json渲染器
+        'rest_framework.renderers.BrowsableAPIRenderer',  # 浏览API渲染器
+    ),
+    # 'DEFAULT_RENDERER_CLASSES': (
+    #     'common.utils.APIResponse',
+    # )
 }
-
 
 AUTHENTICATION_BACKENDS = (
     'users.views.MyCustomBackend',

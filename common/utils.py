@@ -1,4 +1,5 @@
 # 定义装饰器函数
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from functools import wraps
 
@@ -35,15 +36,22 @@ def MyResponse(func):
 
     return wrapper
 
-
-class APIResponse(Response):
-    def __init__(self, status=20000, msg='ok', http_status=None, headers=None, exception=False, **kwargs):
-        # 将外界传入的数据状态码，状态信息以及其他所有额外存储在kwargs中的信息，都格式化成data数据
-        data = {
-            'status': status,
-            'msg': msg
+class ApiRenderer(JSONRenderer):
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        status_code = renderer_context['response'].status_code*100
+        response = {
+            "status": "success",
+            "code": status_code,
+            "data": data,
+            "message": None
         }
-        # 在外界数据可以用result和results来存储
-        if kwargs:
-            data.update(kwargs)
-        super().__init__(data=data, stutus=http_status, headers=headers, exception=exception)
+
+        if not str(status_code).startswith('2'):
+            response["status"] = "error"
+            response["data"] = None
+            try:
+                response["message"] = data["detail"]
+            except KeyError:
+                response["data"] = data
+
+        return super().render(response, accepted_media_type, renderer_context)
