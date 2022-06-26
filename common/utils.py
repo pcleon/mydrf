@@ -61,12 +61,12 @@ def my_response(func):
 
 
 def my_exception_handler(exc, context):
-    # drf的exception_handler做基础处理
+    # drf的exception_handler做基础处理APIException, 404Exception
     response = exception_handler(exc, context)
-    # 为空，进行自定义二次处理
+    # 非以上drf异常,进行自定义异常处理
     if response is None:
         return Response({
-            'detail': f'服务器错误:{exc}'
+            'detail': f'{exc}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR, exception=True)
 
     return response

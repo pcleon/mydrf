@@ -94,25 +94,29 @@ class UserViewSet(viewsets.ModelViewSet):
 
     permission_classes = (IsAuthenticated,)
 
-    # @action(methods=['GET'], detail=False, permission_classes=[IsAuthenticatedOrReadOnly])
-    # def info(self, request):
-    #     token = request.query_params.get("token")
-    #     access_token = AccessToken(token)
-    #     user = User.objects.get(id=access_token['user_id'])
-    #     u_info = {
-    #         "uid": user.id,
-    #         "name": user.username,
-    #         "team": user.team.team_name,
-    #         "roles": [x.get_role_display() for x in user.roles.all()],
-    #         "email": user.email,
-    #         "avatar": "https://avatars.githubusercontent.com/u/2787937?s=100",
-    #         "introduction": f"我是{user.username}, 哈哈哈哈!!"
-    #     }
-    #
-    #     return Response(u_info)
+    @action(methods=['GET'], detail=False, permission_classes=[IsAuthenticatedOrReadOnly])
+    def info(self, request):
+        '''
+        token
+        用户信息
+        '''
+        token = request.query_params.get("token")
+        access_token = AccessToken(token)
+        user = User.objects.get(id=access_token['user_id'])
+        u_info = {
+            "uid": user.id,
+            "name": user.username,
+            "team": user.team.team_name,
+            "roles": [x.get_role_display() for x in user.roles.all()],
+            "email": user.email,
+            "avatar": "https://avatars.githubusercontent.com/u/2787937?s=100",
+            "introduction": f"我是{user.username}, 哈哈哈哈!!"
+        }
+
+        return Response(u_info)
 
     # 分页
-    # pagination_class = MyPageNumberPagination
+    pagination_class = MyPageNumberPagination
     # 按用户名查找
     lookup_field = 'username'
 

@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'drf_yasg',
     'users',
     'books',
     'blog',
@@ -122,7 +123,6 @@ REST_FRAMEWORK = {
         # JWT
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
     ),
     # 权限设置
     'DEFAULT_PERMISSION_CLASSES': (
