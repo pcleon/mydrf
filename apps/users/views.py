@@ -1,6 +1,8 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import AccessToken
@@ -10,10 +12,9 @@ from django.db.models import Q
 from common.pagination import MyPageNumberPagination
 from users.models import User
 from users.serializers import UserSerializer
-from common.utils import MyResponse
+from common.utils import my_response
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
-from rest_framework.permissions import AllowAny, IsAuthenticated
 
 
 class UserTokenVerifyView(TokenVerifyView):
@@ -50,10 +51,11 @@ class MyVueObtainTokenView(TokenObtainPairView):
 
 
 class MyVueVerifyView(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     # @MyResponse
     def get(self, request):
+        # def user_info(self, request):
         token = request.query_params.get("token")
         access_token = AccessToken(token)
         user = User.objects.get(id=access_token['user_id'])
@@ -90,17 +92,36 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
+
+    # @action(methods=['GET'], detail=False, permission_classes=[IsAuthenticatedOrReadOnly])
+    # def info(self, request):
+    #     token = request.query_params.get("token")
+    #     access_token = AccessToken(token)
+    #     user = User.objects.get(id=access_token['user_id'])
+    #     u_info = {
+    #         "uid": user.id,
+    #         "name": user.username,
+    #         "team": user.team.team_name,
+    #         "roles": [x.get_role_display() for x in user.roles.all()],
+    #         "email": user.email,
+    #         "avatar": "https://avatars.githubusercontent.com/u/2787937?s=100",
+    #         "introduction": f"我是{user.username}, 哈哈哈哈!!"
+    #     }
+    #
+    #     return Response(u_info)
+
     # 分页
-    pagination_class = MyPageNumberPagination
+    # pagination_class = MyPageNumberPagination
     # 按用户名查找
     lookup_field = 'username'
+
 
 class LogoutView(APIView):
     """
     登出
     """
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         data = "logout"

@@ -3,7 +3,7 @@ from collections import OrderedDict
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from common.utils import MyResponse
+from common.utils import my_response
 
 
 class MyPageNumberPagination(PageNumberPagination):

@@ -130,15 +130,14 @@ REST_FRAMEWORK = {
     ),
     # 全局自定义分页
     'DEFAULT_PAGINATION_CLASS': 'common.pagination.MyPageNumberPagination',
+    # 全局异常处理
+    'EXCEPTION_HANDLER': 'common.utils.my_exception_handler',
     # 重定义渲染
     'DEFAULT_RENDERER_CLASSES': (  # 默认响应渲染类
         'common.utils.ApiRenderer',  # 全局使用自定义渲染器
         'rest_framework.renderers.JSONRenderer',  # json渲染器
         'rest_framework.renderers.BrowsableAPIRenderer',  # 浏览API渲染器
     ),
-    # 'DEFAULT_RENDERER_CLASSES': (
-    #     'common.utils.APIResponse',
-    # )
 }
 
 AUTHENTICATION_BACKENDS = (

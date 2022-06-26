@@ -9,8 +9,9 @@ router = DefaultRouter()
 router.register('', UserViewSet, basename='user')
 
 urlpatterns = [
-    path('login/', MyVueObtainTokenView.as_view(), name='token_obtain_pair'),
-    path('info/', MyVueVerifyView.as_view(), name='token_refresh'),
+    path('login/', MyVueObtainTokenView.as_view(), name='token_obtain'),
+    path('info/', MyVueVerifyView.as_view(), name='token_verify'),
     path("logout/", LogoutView.as_view()),
 ]
 urlpatterns += router.urls
+print(urlpatterns)

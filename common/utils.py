@@ -1,10 +1,33 @@
 # 定义装饰器函数
+from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
+from rest_framework.views import exception_handler
 from functools import wraps
 
 
-def MyResponse(func):
+class ApiRenderer(JSONRenderer):
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        status_code = renderer_context['response'].status_code * 100
+        response = {
+            "status": "success",
+            "code": status_code,
+            "data": data,
+            "message": None
+        }
+
+        if not str(status_code).startswith('2'):
+            response["status"] = "error"
+            response["data"] = None
+            try:
+                response["message"] = data["detail"]
+            except KeyError:
+                response["data"] = data
+
+        return super().render(response, accepted_media_type, renderer_context)
+
+
+def my_response(func):
     '''
     need dict
     :param func:
@@ -36,22 +59,14 @@ def MyResponse(func):
 
     return wrapper
 
-class ApiRenderer(JSONRenderer):
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        status_code = renderer_context['response'].status_code*100
-        response = {
-            "status": "success",
-            "code": status_code,
-            "data": data,
-            "message": None
-        }
 
-        if not str(status_code).startswith('2'):
-            response["status"] = "error"
-            response["data"] = None
-            try:
-                response["message"] = data["detail"]
-            except KeyError:
-                response["data"] = data
+def my_exception_handler(exc, context):
+    # drf的exception_handler做基础处理
+    response = exception_handler(exc, context)
+    # 为空，进行自定义二次处理
+    if response is None:
+        return Response({
+            'detail': f'服务器错误:{exc}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR, exception=True)
 
-        return super().render(response, accepted_media_type, renderer_context)
+    return response
