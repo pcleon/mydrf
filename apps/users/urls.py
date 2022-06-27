@@ -11,4 +11,3 @@ urlpatterns = [
     path("logout/", LogoutView.as_view()),
 ]
 urlpatterns += router.urls
-print(urlpatterns)

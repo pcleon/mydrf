@@ -6,7 +6,7 @@ import sys
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # 添加apps到path查找路径中,方便直接导入
-sys.path.insert(0, Path.joinpath(BASE_DIR, 'apps'))
+sys.path.insert(0, str(Path.joinpath(BASE_DIR, 'apps')))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -60,8 +60,7 @@ CORS_ALLOWED_ORIGINS = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
