@@ -11,16 +11,16 @@ class User(AbstractUser):
     team = models.ForeignKey('Team', on_delete=models.CASCADE, blank=True, null=True, db_column='team',
                              verbose_name='团队')
 
-    roles = models.ManyToManyField('Role', db_column='roles', db_table='my_user_role', blank=True, verbose_name='角色')
+    roles = models.ManyToManyField('Role', db_column='roles', db_table='rbac_user_role', blank=True, verbose_name='角色')
 
     def __str__(self):
         return self.username
 
     def roles_name(self):
-        return [x.get_role_display() for x in self.roles.all()]
+        return [x.get_role_name for x in self.roles.all()]
 
     class Meta:
-        db_table = 'my_user'
+        db_table = 'rbac_user'
         # ordering = ['-id']
         verbose_name = "用户"
         verbose_name_plural = verbose_name
@@ -34,31 +34,38 @@ class Team(models.Model):
 
     class Meta:
         # ordering = ['-id']
-        db_table = 'my_team'
+        db_table = 'rbac_team'
         verbose_name = "团队"
         verbose_name_plural = verbose_name
 
 
 class Role(models.Model):
-    role_choices = (
-        (0, '管理员'),
-        (1, 'DBA'),
-        (2, 'admin'),
-        (3, 'editor'),
-        (4, 'developer'),
-    )
-    role = models.IntegerField('用户角色', choices=role_choices, blank=True)
+    role_name = models.CharField('角色', max_length=20, unique=True)
+    permissions = models.ManyToManyField('Permission', db_column='permissions', db_table='rbac_role_permission', blank=True, verbose_name='权限',)
 
-    def user_list(self):
-        return [x.get_username() for x in self.user_set.all()]
+    def permission_list(self):
+        return [x.uri for x in self.permissions.all()]
 
     def __str__(self):
-        return self.get_role_display()
+        return self.role_name
 
     class Meta:
-        db_table = 'my_role'
-        verbose_name = "用户角色"
+        db_table = 'rbac_role'
+        verbose_name = "角色"
         verbose_name_plural = verbose_name
+
+class Permission(models.Model):
+    permission_name = models.CharField('权限名', max_length=50, unique=True)
+    uri = models.CharField('uri地址', max_length=200, default='', unique=True)
+
+    def __str__(self):
+        return self.permission_name
+
+    class Meta:
+        db_table = 'rbac_permission'
+        verbose_name = "api权限"
+        verbose_name_plural = verbose_name
+
 
 #
 # class RoleUserRelation(models.Model):

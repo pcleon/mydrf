@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
-from users.models import User
-from users.models import Role, Team
+from rbac.models import User, Permission
+from rbac.models import Role, Team
 
 admin.site.site_header = 'pcleon的管理页'
 
@@ -13,28 +13,38 @@ class UsershipInline(admin.TabularInline):
 
 @admin.register(Role)
 class RoleAdm(admin.ModelAdmin):
-    list_display = ['role']
+    list_display = ['id', 'role_name', 'permission_list']
+    list_display_links = ['role_name', ]
     fieldsets = (
-        (_('角色'), {'fields': ('role',)}),
+        (_('角色信息'), {'fields': ('role_name', 'permissions')}),
     )
 
-    inlines = [
-        UsershipInline,
-    ]
+    # inlines = [
+    #     UsershipInline,
+    # ]
+    filter_horizontal = ('permissions',)
+    ordering = ('id',)
 
 
 @admin.register(User)
 class UserAdm(UserAdmin):
-    list_display = ['username', 'email', 'mobile', 'team', 'roles_name']
+    list_display = ['username', 'email', 'mobile', 'roles_name']
     list_display_links = ['username', ]
-    list_editable = ['email', 'mobile', 'team']
-    list_filter = ['team']
-    autocomplete_fields = ['team']  # use select2 to select user
+    list_editable = ['email', 'mobile', ]
+    # list_filter = ['team_name']
+    # autocomplete_fields = ['Team']  # use select2 to select user
 
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+                'username', 'password1', 'password2', 'is_staff', 'email', 'mobile', 'team', 'roles'),
+        }),
+    )
     fieldsets = (
         ('用户信息', {'fields': ('username', 'password')}),
         (_('用户详情'), {'fields': ('team', 'mobile', 'email', 'is_active')}),
-        (_('角色'), {'fields': ('roles', 'user_permissions')}),
+        (_('角色'), {'fields': ('roles',)}),
         # (_('Permissions'), {
         #     'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         # }),
@@ -45,14 +55,11 @@ class UserAdm(UserAdmin):
     filter_horizontal = ('roles',)
 
 
-#
-#
 class UserInline(admin.TabularInline):
     model = User
     fields = ['id', 'username', 'email', 'mobile']
 
 
-@admin.register(Team)
 class TeamAdm(admin.ModelAdmin):
     list_display = ['id', 'team_name']
     list_display_links = ['id']
@@ -60,11 +67,24 @@ class TeamAdm(admin.ModelAdmin):
     ordering = ('id',)
     search_fields = ('team_name',)
     # 在详情页里面可以同时编辑userInline信息
-    inlines = [UserInline, ]
+    # inlines = [UserInline, ]
 
-# class RoleUserRelationAdm(admin.ModelAdmin):
-#     list_display = ['id', 'username', 'role_id']
-#     list_display_links = ['username', 'role_id']
-#
-#
-# admin.site.register(RoleUserRelation, RoleUserRelationAdm)
+
+admin.site.register(Team, TeamAdm)
+
+
+class RoleShipInline(admin.TabularInline):
+    model = Role.permissions.through
+    # fields = ['role_name']
+
+class PermissionAdm(admin.ModelAdmin):
+    list_display = ['permission_name', 'uri']
+    list_display_links = ['permission_name']
+    list_editable = ['uri']
+
+    inlines = [
+        RoleShipInline,
+    ]
+
+
+admin.site.register(Permission, PermissionAdm)

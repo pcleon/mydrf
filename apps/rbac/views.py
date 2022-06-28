@@ -10,8 +10,8 @@ from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 
 from common.pagination import MyPageNumberPagination
-from users.models import User
-from users.serializers import UserSerializer
+from rbac.models import User
+from rbac.serializers import UserSerializer
 from common.utils import my_response
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView

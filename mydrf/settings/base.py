@@ -20,7 +20,7 @@ DEBUG = False
 ALLOWED_HOSTS = ['*', ]
 
 # 使用自定义用户模板
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'rbac.User'
 
 # Application definition
 
@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'drf_yasg',
-    'users',
+    'rbac',
     'books',
     'blog',
 ]
@@ -140,7 +140,7 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'users.views.MyCustomBackend',
+    'rbac.views.MyCustomBackend',
 )
 
 SIMPLE_JWT = {

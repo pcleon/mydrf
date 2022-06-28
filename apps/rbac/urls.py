@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from rest_framework.routers import DefaultRouter
-from users.views import MyVueObtainTokenView, LogoutView, UserViewSet
+from rbac.views import MyVueObtainTokenView, LogoutView, UserViewSet
 
 
 router = DefaultRouter()

@@ -3,16 +3,13 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.models import User, Team, Role
+from rbac.models import User, Team, Role
 
 
 class RoleSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(source='get_role_display')
-
     class Meta:
         model = Role
         fields = '__all__'
-        # extra_kwargs = {'password': {'write_only': True}}
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
     # queryset=Role.objects.all(), source="username")
 
     def get_roles(self, obj):
-        return [x.role.get_role_display() for x in self.roles.all()]
+        return [x.role_name for x in self.roles.all()]
 
     class Meta:
         model = User
