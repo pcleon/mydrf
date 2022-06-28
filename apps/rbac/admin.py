@@ -28,7 +28,7 @@ class RoleAdm(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdm(UserAdmin):
-    list_display = ['username', 'email', 'mobile', 'roles_name']
+    list_display = ['username', 'email', 'mobile', 'team', 'roles_name']
     list_display_links = ['username', ]
     list_editable = ['email', 'mobile', ]
     # list_filter = ['team_name']
@@ -38,7 +38,7 @@ class UserAdm(UserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': (
-                'username', 'password1', 'password2', 'is_staff', 'email', 'mobile', 'team', 'roles'),
+                'username', 'password1', 'password2', 'email', 'mobile', 'team', 'roles'),
         }),
     )
     fieldsets = (

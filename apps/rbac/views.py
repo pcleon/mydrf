@@ -107,7 +107,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "uid": user.id,
             "name": user.username,
             "team": user.team.team_name,
-            "roles": [x.get_role_display() for x in user.roles.all()],
+            "roles": [x.role_name for x in user.roles.all()],
             "email": user.email,
             "avatar": "https://avatars.githubusercontent.com/u/2787937?s=100",
             "introduction": f"我是{user.username}, 哈哈哈哈!!"

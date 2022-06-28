@@ -8,8 +8,7 @@ class User(AbstractUser):
     mobile = models.CharField('手机号', max_length=11, default='', blank=True, null=True)
     # avatar = models.CharField('头像', default='', max_length=100, blank=True, null=True)
     # 通过db_column指定添加的约束的字段名,否则为默认"字段名_id"
-    team = models.ForeignKey('Team', on_delete=models.CASCADE, blank=True, null=True, db_column='team',
-                             verbose_name='团队')
+    team = models.ForeignKey('Team', on_delete=models.CASCADE, db_column='team', verbose_name='小组')
 
     roles = models.ManyToManyField('Role', db_column='roles', db_table='rbac_user_role', blank=True, verbose_name='角色')
 
@@ -17,7 +16,7 @@ class User(AbstractUser):
         return self.username
 
     def roles_name(self):
-        return [x.get_role_name for x in self.roles.all()]
+        return [x.role_name for x in self.roles.all()]
 
     class Meta:
         db_table = 'rbac_user'
@@ -27,7 +26,7 @@ class User(AbstractUser):
 
 
 class Team(models.Model):
-    team_name = models.CharField('团队名', max_length=24, default='', blank=True, unique=True)
+    team_name = models.CharField('小组名', max_length=24, default='', unique=True)
 
     def __str__(self):
         return self.team_name
@@ -35,7 +34,7 @@ class Team(models.Model):
     class Meta:
         # ordering = ['-id']
         db_table = 'rbac_team'
-        verbose_name = "团队"
+        verbose_name = "小组"
         verbose_name_plural = verbose_name
 
 
