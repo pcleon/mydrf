@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from rbac.models import User, Team, Role
+from rbac.models import User, Team, Role, Permission
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -55,7 +55,7 @@ class MyVueTokenObtainSerializer(TokenObtainSerializer):
         data["token"] = str(refresh.access_token)
         return data
 
-# class GroupSerializer(serializers.HyperlinkedModelSerializer):
-#     class Meta:
-#         model = Group
-#         fields = ('url', 'name')
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = '__all__'

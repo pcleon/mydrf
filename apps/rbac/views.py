@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -10,11 +11,11 @@ from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 
 from common.pagination import MyPageNumberPagination
-from rbac.models import User
 from rbac.serializers import UserSerializer
-from common.utils import my_response
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
+
+User = get_user_model()
 
 
 class UserTokenVerifyView(TokenVerifyView):
