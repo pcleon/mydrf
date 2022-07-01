@@ -11,6 +11,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 
 from common.pagination import MyPageNumberPagination
+from common.permissions import MyUrlNamePermissions
 from rbac.serializers import UserSerializer
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
@@ -96,6 +97,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     @action(methods=['GET'], detail=False, permission_classes=[IsAuthenticatedOrReadOnly])
+    # @action(methods=['GET'], detail=False, name='userinfo', permission_classes=[IsAuthenticatedOrReadOnly, MyUrlNamePermissions])
     def info(self, request):
         '''
         token

@@ -1,14 +1,16 @@
 import os
 import sys
 from pathlib import Path
+import django
 from django.conf import settings
 from django.urls import URLPattern, URLResolver
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 # 添加apps到path查找路径中,方便直接导入
-sys.path.insert(0, str(Path.joinpath(BASE_DIR, 'mydrf')))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.dev')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mydrf.settings.dev')
+django.setup()
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent
 
 urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [''])
 

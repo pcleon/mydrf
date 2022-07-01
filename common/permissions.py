@@ -1,8 +1,12 @@
 from collections import OrderedDict
 from django.contrib.auth import get_user_model
+from django.urls import resolve
 from rest_framework.permissions import BasePermission
 
+from rbac.models import Role
+
 User = get_user_model()
+
 
 class DjangoModelPermissions(BasePermission):
     """
@@ -79,11 +83,25 @@ class DjangoModelPermissions(BasePermission):
 
 class MyUrlNamePermissions(BasePermission):
 
+    def __init__(self) -> None:
+        self.allow_url_name = (
+            'login',
+            'user-info',
+        )
+
     def has_permission(self, request, view):
-        uri_list = []
+        return True
         uri = request.path
-        roles = User.roles.all()
+        matchPattern = resolve(uri)
+        # 公共接口允许任何人访问
+        if matchPattern.url_name in self.allow_url_name:
+            return True
+
+        reg_list = []
+        roles = request.user.roles.all()
         # roles = User.roles_name()
         for role in roles:
-            uri_list += Role.permission_list(role)
-        print(uri_list)
+            reg_list += Role.permission_list(role)
+        if matchPattern.url_name in reg_list:
+            return True
+        return False

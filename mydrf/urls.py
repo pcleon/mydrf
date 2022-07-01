@@ -48,3 +48,5 @@ urlpatterns = [
     # path('api/blog/', include('blog.urls')),
     # path('api/vue-element-admin/', include('books.urls'))
 ]
+
+print(urlpatterns)

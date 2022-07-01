@@ -20,7 +20,7 @@ class User(AbstractUser):
 
     class Meta:
         db_table = 'rbac_user'
-        # ordering = ['-id']
+        ordering = ['id']
         verbose_name = "用户"
         verbose_name_plural = verbose_name
 
