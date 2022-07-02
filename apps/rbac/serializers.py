@@ -6,7 +6,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rbac.models import User, Team, Role, Permission
 
 
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = '__all__'
+
+
 class RoleSerializer(serializers.ModelSerializer):
+    permissions = PermissionSerializer(many=True)
+
     class Meta:
         model = Role
         fields = '__all__'
@@ -17,21 +25,31 @@ class UserSerializer(serializers.ModelSerializer):
     team = serializers.PrimaryKeyRelatedField(source='team.team_name', read_only=True)
     # team = serializers.SlugRelatedField(slug_field='team_name', queryset=Team.objects.all())
 
-    # roles = serializers.SlugRelatedField(slug_field='role', many=True, queryset=Role.objects.all(), allow_null=True)
+    roles = serializers.SlugRelatedField(slug_field='role_name', many=True, queryset=Role.objects.all(),
+                                         allow_null=True)
+
+    # roles = RoleSerializer(many=True)
+    # permissions = serializers.ManyRelatedField(
+    #     serializers.SlugRelatedField(slug_field="username", source="user_id"),
+    #     queryset=User.objects.all(),
+    #     source="follow"
+    # )
+
     # roles = serializers.ManyRelatedField(
-    #     child_relation=serializers.SlugRelatedField(slug_field="role", many=True, queryset=Role.objects.all()), source='username')
+    #     child_relation=serializers.SlugRelatedField(slug_field="role_name", many=True, queryset=Role.objects.all()), source='username')
     # queryset=Role.objects.all(), source="username")
 
-    def get_roles(self, obj):
-        return [x.role_name for x in self.roles.all()]
+    # def get_roles(self, obj):
+    #     return [x.role_name for x in self.roles.all()]
+    # roles = RoleSerializer(many=True)
 
     class Meta:
         model = User
         fields = (
             'id', 'username', 'mobile', 'email', 'team', 'date_joined',
-            'last_login', 'is_active', 'roles', 'roles_name')
+            'last_login', 'is_active', 'roles', )
         read_only_fields = (
-            'id', 'username', 'date_joined', 'last_login', 'roles_name'
+            'id', 'username', 'date_joined', 'last_login'
         )
         extra_kwargs = {
             # 'roles': {'write_only': True},
@@ -54,8 +72,3 @@ class MyVueTokenObtainSerializer(TokenObtainSerializer):
         refresh = self.get_token(self.user)
         data["token"] = str(refresh.access_token)
         return data
-
-class PermissionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Permission
-        fields = '__all__'

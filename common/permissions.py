@@ -1,107 +1,75 @@
-from collections import OrderedDict
-from django.contrib.auth import get_user_model
-from django.urls import resolve
-from rest_framework.permissions import BasePermission
+import re
 
-from rbac.models import Role
+from django.contrib.auth import get_user_model
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+from django.contrib.auth.models import User, AnonymousUser
 
 User = get_user_model()
 
-
-class DjangoModelPermissions(BasePermission):
-    """
-    The request is authenticated using `django.contrib.auth` permissions.
-    See: https://docs.djangoproject.com/en/dev/topics/auth/#permissions
-
-    It ensures that the user is authenticated, and has the appropriate
-    `add`/`change`/`delete` permissions on the model.
-
-    This permission can only be applied against view classes that
-    provide a `.queryset` attribute.
-    """
-
-    # Map methods into required permission codes.
-    # Override this if you need to also provide 'view' permissions,
-    # or if you want to provide custom permission codes.
-    perms_map = {
-        'GET': [],
-        'OPTIONS': [],
-        'HEAD': [],
-        'POST': ['%(app_label)s.add_%(model_name)s'],
-        'PUT': ['%(app_label)s.change_%(model_name)s'],
-        'PATCH': ['%(app_label)s.change_%(model_name)s'],
-        'DELETE': ['%(app_label)s.delete_%(model_name)s'],
-    }
-
-    authenticated_users_only = True
-
-    def get_required_permissions(self, method, model_cls):
-        """
-        Given a model and an HTTP method, return the list of permission
-        codes that the user is required to have.
-        """
-        kwargs = {
-            'app_label': model_cls._meta.app_label,
-            'model_name': model_cls._meta.model_name
-        }
-
-        if method not in self.perms_map:
-            raise exceptions.MethodNotAllowed(method)
-
-        return [perm % kwargs for perm in self.perms_map[method]]
-
-    def _queryset(self, view):
-        assert hasattr(view, 'get_queryset') \
-            or getattr(view, 'queryset', None) is not None, (
-            'Cannot apply {} on a view that does not set '
-            '`.queryset` or have a `.get_queryset()` method.'
-        ).format(self.__class__.__name__)
-
-        if hasattr(view, 'get_queryset'):
-            queryset = view.get_queryset()
-            assert queryset is not None, (
-                '{}.get_queryset() returned None'.format(view.__class__.__name__)
-            )
-            return queryset
-        return view.queryset
-
-    def has_permission(self, request, view):
-        # Workaround to ensure DjangoModelPermissions are not applied
-        # to the root view when using DefaultRouter.
-        if getattr(view, '_ignore_model_permissions', False):
-            return True
-
-        if not request.user or (
-           not request.user.is_authenticated and self.authenticated_users_only):
-            return False
-
-        queryset = self._queryset(view)
-        perms = self.get_required_permissions(request.method, queryset.model)
-
-        return request.user.has_perms(perms)
+# 参考用
+# class IsOwnerOrReadOnly(BasePermission):
+#     """
+#     自定义权限只允许对象的创建者才能编辑它。"""
+#
+#     def has_object_permission(self, request, view, obj):
+#         # 读取权限被允许用于任何请求，
+#         # 所以我们始终允许 GET，HEAD 或 OPTIONS 请求。
+#         if request.method in SAFE_METHODS:
+#             return True
+#         # 写入权限只允许给 article 的作者:检查文章的作者是不是当前登录的用户
+#         return obj.author == request.user
+#
 
 
-class MyUrlNamePermissions(BasePermission):
+
+# 验证drf登录
+class MyDrfAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        username = request.META.get('X_USERNAME')
+        if not username:
+            return None
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise AuthenticationFailed('No such user')
+
+        return (user, None)
+
+
+# 验证uri是否可以访问,通过uri正则匹配来限制
+class MyPermissions(BasePermission):
 
     def __init__(self) -> None:
-        self.allow_url_name = (
-            'login',
-            'user-info',
-        )
+        pass
 
     def has_permission(self, request, view):
-        return True
-        uri = request.path
-        matchPattern = resolve(uri)
-        # 公共接口允许任何人访问
-        if matchPattern.url_name in self.allow_url_name:
-            return True
+        # return True
+        # 先确认是否为登录用户
+        if isinstance(request.user, AnonymousUser):
+            return False
 
-        reg_list = []
+        print('使用了permission')
+        # return True
+        uri = request.path
+        # matchPattern = resolve(uri)
         roles = request.user.roles.all()
-        # roles = User.roles_name()
+        # 从角色中获取可以访问的url_name正则列表并去重
+        # permissions = roles.permission_reg()
+        reg_list = []
+        # 逐个从角色中取出正则列表,再逐一对比,匹配成功一个就返回
         for role in roles:
-            reg_list += Role.permission_list(role)
-        if matchPattern.url_name in reg_list:
-            return True
+            for reg in role.permission_regex():
+                # 忽略重复reg
+                if reg in reg_list:
+                    continue
+                # 匹配直接返回
+                elif re.match(reg, uri):
+                    return True
+                # 添加到列表中
+                else:
+                    reg_list.append(reg)
         return False

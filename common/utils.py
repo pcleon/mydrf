@@ -1,9 +1,12 @@
 # 定义装饰器函数
+import re
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 from functools import wraps
+
+regx = re.compile('^(2|3)\d+')
 
 
 class ApiRenderer(JSONRenderer):
@@ -16,12 +19,12 @@ class ApiRenderer(JSONRenderer):
             "message": None
         }
 
-        if not str(status_code).startswith('2'):
+        if not re.match(regx, str(status_code)):
             response["status"] = "error"
             response["data"] = None
             try:
                 response["message"] = data["detail"]
-            except KeyError:
+            except (KeyError, TypeError):
                 response["data"] = data
 
         return super().render(response, accepted_media_type, renderer_context)

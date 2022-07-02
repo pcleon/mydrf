@@ -4,6 +4,7 @@ from pathlib import Path
 import django
 from django.conf import settings
 from django.urls import URLPattern, URLResolver
+from django.urls.resolvers import *
 
 # 添加apps到path查找路径中,方便直接导入
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mydrf.settings.dev')
@@ -28,3 +29,15 @@ def list_urls(lis, acc=None):
 
 for p in list_urls(urlconf.urlpatterns):
     print(''.join(p))
+
+# print(urlconf.urlpatterns)
+
+def url_patterns(lis):
+    for i in lis:
+        if isinstance(i, URLResolver):
+            url_patterns(i.url_patterns)
+        elif isinstance(i, URLPattern):
+            print(f'{i.name}: {i.pattern}')
+        else:
+            raise AttributeError
+# url_patterns(urlconf.urlpatterns)

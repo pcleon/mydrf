@@ -13,7 +13,7 @@ class UsershipInline(admin.TabularInline):
 
 @admin.register(Role)
 class RoleAdm(admin.ModelAdmin):
-    list_display = ['id', 'role_name', 'permission_list']
+    list_display = ['id', 'role_name', 'permission_regex']
     list_display_links = ['role_name', ]
     fieldsets = (
         (_('角色信息'), {'fields': ('role_name', 'permissions')}),

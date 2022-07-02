@@ -123,7 +123,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
-    # 权限设置
+    # 权限认证,仅对drf接口生效
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
@@ -140,6 +140,7 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
+    # 只做登录用户和密码的认证
     'rbac.views.MyCustomBackend',
 )
 

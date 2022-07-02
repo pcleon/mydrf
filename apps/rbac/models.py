@@ -42,8 +42,13 @@ class Role(models.Model):
     role_name = models.CharField('角色', max_length=20, unique=True)
     permissions = models.ManyToManyField('Permission', db_column='permissions', db_table='rbac_role_permission', blank=True, verbose_name='权限',)
 
-    def permission_list(self):
-        return [x.uri for x in self.permissions.all()]
+    def permission_regex(self):
+        # permissions = self.permissions.all()
+        # return [x.uri for x in self.permissions.all()]
+        p_list = []
+        for permission in self.permissions.all():
+            p_list += permission.uri.strip().split(',')
+        return list(dict.fromkeys(p_list))
 
     def __str__(self):
         return self.role_name
@@ -55,7 +60,7 @@ class Role(models.Model):
 
 class Permission(models.Model):
     permission_name = models.CharField('权限名', max_length=50, unique=True)
-    uri = models.CharField('uri地址', max_length=200, default='', unique=True)
+    uri = models.CharField('uri正则(,分隔)', max_length=200, default='', unique=True)
 
     def __str__(self):
         return self.permission_name
