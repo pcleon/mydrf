@@ -118,6 +118,9 @@ APPEND_SLASH = True
 
 # DRF
 REST_FRAMEWORK = {
+    # 'DEFAULT_FILTER_BACKENDS': [
+    #     'django_filters.rest_framework.DjangoFilterBackend'
+    # ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # JWT
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -141,11 +144,11 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = (
     # 只做登录用户和密码的认证
-    'rbac.views.MyCustomBackend',
+    'rbac.views.MyAuthenticationBackend',
 )
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=5),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=1),
     'TOKEN_TYPE_CLAIM': 'auth',
     # 自定义头标识符
     'AUTH_HEADER_TYPES': ('Vue',),

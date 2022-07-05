@@ -9,21 +9,6 @@ from django.contrib.auth.models import User, AnonymousUser
 
 User = get_user_model()
 
-# 参考用
-# class IsOwnerOrReadOnly(BasePermission):
-#     """
-#     自定义权限只允许对象的创建者才能编辑它。"""
-#
-#     def has_object_permission(self, request, view, obj):
-#         # 读取权限被允许用于任何请求，
-#         # 所以我们始终允许 GET，HEAD 或 OPTIONS 请求。
-#         if request.method in SAFE_METHODS:
-#             return True
-#         # 写入权限只允许给 article 的作者:检查文章的作者是不是当前登录的用户
-#         return obj.author == request.user
-#
-
-
 
 # 验证drf登录
 class MyDrfAuthentication(BaseAuthentication):
@@ -40,8 +25,39 @@ class MyDrfAuthentication(BaseAuthentication):
         return (user, None)
 
 
+# 单method权限
+def method_permission_classes(classes):
+    def decorator(func):
+        def decorated_func(self, *args, **kwargs):
+            self.permission_classes = classes
+            # this call is needed for request permissions
+            self.check_permissions(self.request)
+            return func(self, *args, **kwargs)
+
+        return decorated_func
+
+    return decorator
+
+
+# 自己访问自己
+class IsOwner(BasePermission):
+    """ 自定义权限只允许对象自身才能获取它。"""
+
+    def has_permission(self, request, view):
+        field = view.lookup_field
+        return view.kwargs.get(field) == getattr(request.user, field)
+
+    def has_object_permission(self, request, view, obj):
+        # 读取权限被允许用于任何请求，
+        # 所以我们始终允许 GET，HEAD 或 OPTIONS 请求。
+        if request.method in SAFE_METHODS:
+            return True
+        # 写入权限只允许给 article 的作者:检查文章的作者是不是当前登录的用户
+        return obj.user == request.user
+
+
 # 验证uri是否可以访问,通过uri正则匹配来限制
-class MyPermissions(BasePermission):
+class MyUriPermissions(BasePermission):
 
     def __init__(self) -> None:
         pass

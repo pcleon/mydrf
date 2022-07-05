@@ -4,16 +4,15 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from common.pagination import MyPageNumberPagination
-from common.permissions import MyPermissions
+from common.permissions import MyUriPermissions, IsOwner, method_permission_classes
 from rbac.serializers import UserSerializer
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
@@ -54,32 +53,39 @@ class MyVueObtainTokenView(TokenObtainPairView):
         return Response({"token": serializer.validated_data.get('access')}, status=HTTP_200_OK)
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(ReadOnlyModelViewSet):
     """
     允许用户查看或编辑的 API 端点。
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    http_method_names = ['get', 'post']
 
-    permission_classes = (MyPermissions,)
+    permission_classes = (MyUriPermissions,)
 
-    @action(methods=['GET'], detail=False, permission_classes=[IsAuthenticatedOrReadOnly])
+    @method_permission_classes([IsOwner])
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(self, request, *args, **kwargs)
+
+    @action(methods=['GET', 'POST'], detail=False, permission_classes=[IsAuthenticated])
     def info(self, request):
         '''
         token
         用户信息
         '''
-        token = request.query_params.get("token")
-        if not token:
-            raise ValidationError(detail='token not provide', code=HTTP_400_BAD_REQUEST)
 
-        access_token = AccessToken(token)
-        user = User.objects.get(id=access_token.get('user_id'))
+        # 使用IsAuthenticated就不需要try了,使用AllowAny需要
+        try:
+            uid = request.META.get('USER')
+        except AttributeError:
+            raise ValidationError(detail='verify fail', code=HTTP_400_BAD_REQUEST)
+
+        user = User.objects.get(username=uid)
         u_info = {
             "uid": user.id,
             "name": user.username,
             "team": user.team.team_name,
-            "roles": [x.role_name for x in user.roles.all()],
+            "roles": user.roles_name(),
             "email": user.email,
             "avatar": "https://avatars.githubusercontent.com/u/2787937?s=100",
             "introduction": f"我是{user.username}, 哈哈哈哈!!"
@@ -104,7 +110,8 @@ class LogoutView(APIView):
         return Response(data)
 
 
-class MyCustomBackend(ModelBackend):
+# 只做登录用户和密码的认证
+class MyAuthenticationBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
             user = User.objects.get(Q(username=username) | Q(email=username))
